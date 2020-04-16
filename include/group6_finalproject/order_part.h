@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/order_path.h
+ * @brief     Header file for Order part
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -38,49 +38,47 @@
  *OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef GROUP6_RWA5_ORDER_PART_H_
+#define GROUP6_RWA5_ORDER_PART_H_
 
-
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
 #include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
-#include <order_part.h>
-#include <environment.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
 
-using std::vector;
 
-class OrderManager
-{
-private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
 
-public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+class OrderPart {
+
+ private:
+	std::string part_type_;
+	geometry_msgs::Pose tray_pose_;
+	geometry_msgs::Pose end_pose_;
+	geometry_msgs::Pose current_pose_;
+	geometry_msgs::Pose middle_pose_;
+	std::string tray_id;
+
+	tf2_ros::Buffer tfBuffer;
+
+	tf2_ros::TransformListener tfListener;
+	geometry_msgs::TransformStamped tS_w_b;
+	
+ public:
+    OrderPart();
+	OrderPart(std::string, std::string, geometry_msgs::Pose);
+	~OrderPart();
+
+	void setPartType(std::string);
+	void setCurrentPose(geometry_msgs::Pose);
+	void setMiddlePose(geometry_msgs::Pose);
+	void setEndPose(geometry_msgs::Pose);
+	std::string getPartType() const;
+	geometry_msgs::Pose getEndPose() const;
+	geometry_msgs::Pose getTrayPose() const;
+	geometry_msgs::Pose getCurrentPose() const;
+	geometry_msgs::Pose getMiddlePose() const;
+	void worldTransformation();
+	std::string getTrayId();
 };
-
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+#endif  // GROUP6_RWA5_ORDER_PART_H_

@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/competition.h
+ * @brief     Header file for competition
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -39,48 +39,68 @@
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GROUP6_RWA4_COMPETITION_H
+#define GROUP6_RWA4_COMPETITION_H
 
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
+#include <algorithm>
 #include <vector>
+
 #include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+
+#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/Range.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/String.h>
+#include <std_srvs/Trigger.h>
 #include <osrf_gear/LogicalCameraImage.h>
 #include <osrf_gear/Order.h>
-#include <order_part.h>
+#include <osrf_gear/Proximity.h>
+#include <trajectory_msgs/JointTrajectory.h>
 #include <environment.h>
+#include <sensor_manager.h>
+#include <executer.h>
+#include <planner.h>
 
-using std::vector;
+//class AriacOrderManager;
 
-class OrderManager
-{
+class Competition {
+
 private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
+
+	ros::NodeHandle comp_nh_;
+	//AriacOrderManager order_manager_;
+	ros::AsyncSpinner async_spinner;
+	Environment env_;
+	SensorManager sensor_;
+	Planner planner_;
+	Executer executer_;
+
+
+
+	std::string competition_state_;
+	double current_score_;
+
+	//	osrf_gear::Order order_;
+	ros::Subscriber current_score_subscriber;
+
+	// Subscribe to the '/ariac/competition_state' topic.
+	ros::Subscriber competition_state_subscriber;
 
 public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+	Competition();
+	~Competition();
+	/// Called when a new message is received.
+	void current_score_callback(const std_msgs::Float32::ConstPtr & );
+
+	/// Called when a new message is received.
+	void competition_state_callback(const std_msgs::String::ConstPtr & );
+
+	void StartCompetition();
+
+	void EndCompetition();
+
 };
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+
+#endif //GROUP6_RWA4_COMPETITION_H

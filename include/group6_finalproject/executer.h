@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/competition.h
+ * @brief     Header file for competition
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -40,47 +40,64 @@
  */
 
 
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
+#ifndef GROUP6_RWA5_EXECUTER_H
+#define GROUP6_RWA5_EXECUTER_H
 
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
 #include <order_part.h>
 #include <environment.h>
+#include <osrf_gear/Order.h>
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+#include <robot_controller.h>
+#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/Range.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <transformer.h>
+#include <robot_controller.h>
 
-using std::vector;
 
-class OrderManager
+
+class Executer
 {
 private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
+    ros::NodeHandle execute_nh_;
+	ros::Subscriber execute_sub_;
+	ros::AsyncSpinner async_spinner;
+    ros::Publisher arm_1_joint_trajectory_publisher_;
+	ros::Publisher arm_2_joint_trajectory_publisher_;
+
+	sensor_msgs::JointState arm_1_current_joint_states_;
+	sensor_msgs::JointState arm_2_current_joint_states_;
+	bool arm_1_has_been_zeroed_;
+	bool arm_2_has_been_zeroed_;
+	RobotController arm1_; 
+	RobotController arm2_;
+    Environment* env_;
 
 public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+    Executer(Environment*);
+    ~Executer();
+
+    /// Called when a new JointState message is received.
+	void arm_1_joint_state_callback(const sensor_msgs::JointState::ConstPtr & );
+
+	void arm_2_joint_state_callback(const sensor_msgs::JointState::ConstPtr &);
+
+	/// Create a JointTrajectory with all positions set to zero, and command the arm.
+	void send_arm_to_zero_state(ros::Publisher &);
+
+	void executeCallBack(const std_msgs::Bool::ConstPtr& );
+
+	void deliverThePartinBin(OrderPart * oPart);
+
+	void updatePickupCoordinate(OrderPart * oPart);
+
+	void updateDeliveryCoordinate(OrderPart * oPart);
+	
+	void updatePickPose(OrderPart* );
+
+    void Execute();
 };
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+#endif //GROUP6_RWA5_EXECUTER_H

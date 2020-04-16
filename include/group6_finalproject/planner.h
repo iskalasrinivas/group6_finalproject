@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/planner.h
+ * @brief     Header file for planner
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -38,49 +38,37 @@
  *OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef GROUP6_RWA5_PLANNER_H
+#define GROUP6_RWA5_PLANNER_H
 
-
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
-#include <order_part.h>
 #include <environment.h>
+#include <order_manager.h>
+#include <std_msgs/Bool.h>
+#include <robot_controller.h>
+#include <geometry_msgs/Pose.h>
 
-using std::vector;
-
-class OrderManager
-{
-private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
-
+class Planner {
 public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+    Planner(Environment *);
+    ~Planner();
+    void plan();
+    void target();
+
+private:
+    ros::NodeHandle planner_nh_;
+    ros::Subscriber planner_sub_;
+    ros::Publisher execute_executer;
+    ros::AsyncSpinner async_spinner;
+    int common_pose_ind;
+    Environment *env_;
+    OrderManager ordermanager_;
+    std::vector<OrderPart> arm2_Vector;
+    std::vector<OrderPart> arm1_Vector;
+    void plancallback(const std_msgs::Bool::ConstPtr&);
+//    RobotController arm1_;
+//    RobotController arm2_;
+    geometry_msgs::Pose common_pose_[4];
 };
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+#endif // GROUP6_RWA5_PLANNER_H

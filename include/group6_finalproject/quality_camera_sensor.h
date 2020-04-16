@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/logical_camera_sensor.h
+ * @brief     Header file for Sensor
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -39,48 +39,29 @@
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GROUP6_RWA5_QUALITY_CAMERA_SENSOR_H_
+#define GROUP6_RWA5_QUALITY_CAMERA_SENSOR_H_
 
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
-#include <order_part.h>
 #include <environment.h>
 
-using std::vector;
+class QualityCameraSensor {
 
-class OrderManager
-{
 private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
 
+ros::NodeHandle quality_nh_;
+ros::AsyncSpinner async_spinner;
+ros::Subscriber quality_subscriber_;
+Environment * environment_;
+std::string cam_name;
+bool is_faulty;
 public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+	QualityCameraSensor(std::string, Environment *);
+	~QualityCameraSensor();
+	std::string getCameraName(std::string);
+	void qualityControlSensorCallback(const osrf_gear::LogicalCameraImage::ConstPtr &);
+	bool isPartFaulty();
 };
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+#endif // GROUP6_RWA5_QUALITY_CAMERA_SENSOR_H_

@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      include/logical_camera_sensor.h
+ * @brief     Header file for Sensor
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -39,48 +39,49 @@
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GROUP6_RWA5_TRANSFORMER_H_
+#define GROUP6_RWA5_TRANSFORMER_H_
 
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <ros/ros.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
 #include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
-#include <order_part.h>
-#include <environment.h>
 
-using std::vector;
 
-class OrderManager
-{
-private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
+class Transformer {
 
-public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
+    public:
+
+    Transformer(const std::string &);
+    ~Transformer();
+    std::string getCameraName();
+    void setWorldTransform();
+    void setParentPose(const geometry_msgs::Pose & sensor_pose);
+    void setChildPose(const geometry_msgs::Pose & child_pose);
+    void setPose(const geometry_msgs::Pose , geometry_msgs::TransformStamped &);
+    void setPose(const geometry_msgs::TransformStamped &, geometry_msgs::Pose &);
+    geometry_msgs::Pose getChildWorldPose();
+
+    private:
+    std::string topic_;
+    std::string parent_;
+    std::string child_;
+    tf2_ros::Buffer tf_buffer;
+    tf2_ros::TransformListener tf_listener;
+
+    geometry_msgs::TransformStamped transformStamped1;
+    geometry_msgs::TransformStamped transformStamped2;
+	geometry_msgs::TransformStamped transformStamped3;
+    
+    tf2_ros::TransformBroadcaster br_w_s;
+    tf2_ros::TransformBroadcaster br_s_c;
+
 };
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+
+#endif // GROUP6_RWA5_TRANSFORMER_H

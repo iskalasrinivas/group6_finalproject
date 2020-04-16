@@ -1,6 +1,6 @@
 /**
- * @file      include/order_manager.h
- * @brief     Header file for order manager
+ * @file      src/main.cpp
+ * @brief     Source file for main function
  * @author    Saurav Kumar
  * @author    Raja Srinivas
  * @author    Sanket Acharya
@@ -38,49 +38,34 @@
  *OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
-#ifndef GROUP6_RWA5_ORDER_MANAGER_H_
-#define GROUP6_RWA5_ORDER_MANAGER_H_
-
-#include <list>
-#include <map>
-#include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
+#include <osrf_gear/AGVControl.h>
 #include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseArray.h>
-#include <tf/transform_listener.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Order.h>
-#include <order_part.h>
-#include <environment.h>
+#include <std_srvs/Trigger.h>
+#include <tf/tf.h>
+#include <iostream>
+#include "order_manager.h"
+//#include "../include/group6_rwa4/competition.h"
+#include "competition.h"
+//#include "../include/group6_rwa4/sensor.h"
 
-using std::vector;
 
-class OrderManager
-{
-private:
-    ros::NodeHandle order_manager_nh_;
-    ros::AsyncSpinner async_spinner;
-    ros::Subscriber order_subscriber_;
-    osrf_gear::Order* order_;
-    std::vector<OrderPart*> current_order_;
-    Environment *environment;
-    ros::Publisher execute_planner;
+int main(int argc, char **argv) {
 
-public:
-    explicit OrderManager(Environment *);
-    ~OrderManager();
-    void updateAllOrder();
-    void OrderCallback(const osrf_gear::Order::ConstPtr&);
-    void setOrderParts(const osrf_gear::Order::ConstPtr& order_msg);
-    std::map<std::string, std::vector<OrderPart*>> getTrashParts(std::map<std::string, std::vector<geometry_msgs::Pose>>);
-    bool comparePose();
-    void updatePickupLocation();
-};
+	ROS_INFO("Starting main function");
+	ros::init(argc, argv, "ariac_manager_node");
+	ros::AsyncSpinner async_spinner(0);
+	async_spinner.start();
 
-#endif //  GROUP6_RWA5_ORDER_MANAGER_H_
+//	ros::NodeHandle node_handler;
+//	ros::Duration(20).sleep();
+
+//
+	Competition mycompetition;
+
+
+	ros::waitForShutdown();
+//	}
+
+
+	return 0;
+}
